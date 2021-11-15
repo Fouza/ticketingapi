@@ -78,9 +78,14 @@ class ApiAuthController extends Controller
 
     public function logout(Request $request){
         $user = User::where('email', $request->email)->first();
-        $token = $user->token();
-        $token->revoke();
-        $response = ['message' => 'Déconnexion avec succès'];
-        return response($response, 200);
+        if($user){
+            $token = $user->token();
+            $token->revoke();
+            $response = ['message' => 'Déconnexion avec succès'];
+            return response($response, 200);
+        }else{
+            return response()->json(["message"=>"Il n'existe aucun compte avec cet e-mail"],422);
+        }
+
     }
 }
