@@ -44,8 +44,7 @@ class ApiAuthController extends Controller
             'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:6',
         ]);
-        if ($validator->fails())
-        {
+        if ($validator->fails()){
             return response(['errors'=>$validator->errors()->all()], 422);
         }
         $user = User::where('email', $request->email)->first();
@@ -77,10 +76,11 @@ class ApiAuthController extends Controller
         }
     }
 
-    public function logout (Request $request) {
-        $token = $request->user()->token();
+    public function logout(Request $request){
+        $user = User::where('email', $request->email)->first();
+        $token = $user->token();
         $token->revoke();
-        $response = ['message' => 'You have been successfully logged out!'];
+        $response = ['message' => 'Déconnexion avec succès'];
         return response($response, 200);
     }
 }
