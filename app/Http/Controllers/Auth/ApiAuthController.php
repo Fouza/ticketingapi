@@ -57,6 +57,12 @@ class ApiAuthController extends Controller
                 return response()->json([
                     'status'=>200,
                     'access_token'=>$token,
+                    'user'=> [
+                        'name'=>$user->name,
+                        'lastname'=>$user->lastname,
+                        'email'=>$user->email,
+                        'type'=>$user->type
+                    ]
                     //'token_type'=>'Bearer',
                     // 'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString()
 
