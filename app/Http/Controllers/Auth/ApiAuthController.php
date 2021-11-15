@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -78,8 +79,8 @@ class ApiAuthController extends Controller
 
     public function logout(Request $request){
         $user = User::where('email', $request->email)->first();
-        if($user){
-            $token = $user->token();
+        if(Auth::check() && Auth::user()->email == $user->email){
+            $token = Auth::user()->token();
             $token->revoke();
             $response = ['message' => 'Déconnexion avec succès'];
             return response($response, 200);
