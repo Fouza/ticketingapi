@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
-
+use App\Models\User;
 class TicketController extends Controller
 {
 
@@ -19,6 +19,12 @@ class TicketController extends Controller
     public function getTickets(){
         if(Auth::check()){
             $tickets = Ticket::orderBy('created_at','asc')->get();
+            foreach($tickets as $ticket){
+                $agent = User::find($ticket->user_id);
+                $customer = User::find($ticket->createdBy);
+                $ticket->agent = $agent;
+                $ticket->customer = $customer;
+            }
             return response()->json(["tickets"=>$tickets],200);
         }else{
             return response()->json(["message"=>"Vous n'êtes pas connecté"],403);

@@ -87,6 +87,5 @@ class ApiAuthController extends Controller
         }else{
             return response()->json(["message"=>"Il n'existe aucun compte avec cet e-mail"],422);
         }
-
     }
 }
