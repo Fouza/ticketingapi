@@ -25,7 +25,7 @@ use App\Models\Ticket;
 
 Route::group(['middleware' => ['cors', 'json.response']], function () {
     // Public routes
-    Route::post('/login', [ApiAuthController::class, 'login'])->name('login.api');
+    Route::post('/login', [ApiAuthController::class, 'login'])->name('login.api');//
     Route::post('/register',[ApiAuthController::class, 'register'])->name('register.api');
 
     Route::middleware('auth:api')->group(function () {
@@ -33,10 +33,10 @@ Route::group(['middleware' => ['cors', 'json.response']], function () {
         // Route::get('/user', function(Request $request){
         //     return $request->user();
         // });
-        Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout.api');
-        Route::get('/tickets',[TicketController::class, 'getTickets']);
+        Route::post('/logout', [ApiAuthController::class, 'logout'])->name('logout.api');//
+        Route::get('/tickets',[TicketController::class, 'getTickets']);//
         Route::post('/create-agent',[UserController::class,'createAgent']);
-        Route::post('/create-ticket',[TicketController::class,'create']);
+        Route::post('/create-ticket',[TicketController::class,'create']);//
         Route::post('/assign-ticket',[TicketController::class, 'assignTicket']);
         Route::post('/finish-ticket',[MessageController::class, 'finishTicket']);
         Route::get('/my-messages',[MessageController::class, 'getMyMessages']);
