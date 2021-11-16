@@ -18,7 +18,7 @@ class TicketController extends Controller
 
     public function getTickets(){
         if(Auth::check()){
-            $tickets = Ticket::orderBy('created_at','asc')->get();
+            $tickets = Ticket::orderBy('created_at','desc')->get();
             foreach($tickets as $ticket){
                 $agent = User::find($ticket->user_id);
                 $customer = User::find($ticket->createdBy);
@@ -73,8 +73,16 @@ class TicketController extends Controller
                 $request['createdBy'] = Auth::user()->id;
                 $ticket = Ticket::create($request->toArray());
                 if($ticket){
+                    $tickets = Ticket::orderBy('created_at','desc')->get();
+                    foreach($tickets as $ticket){
+                        $agent = User::find($ticket->user_id);
+                        $customer = User::find($ticket->createdBy);
+                        $ticket->agent = $agent;
+                        $ticket->customer = $customer;
+                    }
                     return response()->json([
-                        "message"=>"Ticket crée avec succès"
+                        "message"=>"Ticket crée avec succès",
+                        "tickets"=>$tickets
                     ],200);
                 }else{
                     return response()->json([
