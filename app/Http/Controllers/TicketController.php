@@ -107,10 +107,10 @@ class TicketController extends Controller
             if(Auth::user()->type == 'agent'){
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
-					$tickets = Ticket::orderBy('created_at','desc')->get();
 
 					if(!!$ticket->user_id){
 	                    $message = "Ce ticket est déjà pris";
+                		$tickets = Ticket::orderBy('created_at','desc')->get();
                         foreach($tickets as $t){
                             $agent = User::find($t->user_id);
                             $customer = User::find($t->createdBy);
@@ -127,6 +127,7 @@ class TicketController extends Controller
 						$ticket->user_id = Auth::user()->id;
 						$message = "Le ticket est maintenat à vous de traiter";
 						if($ticket->save()){
+        					$tickets = Ticket::orderBy('created_at','desc')->get();
                             foreach($tickets as $t){
                                 $agent = User::find($t->user_id);
                                 $customer = User::find($t->createdBy);
