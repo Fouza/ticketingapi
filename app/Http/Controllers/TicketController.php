@@ -121,7 +121,7 @@ class TicketController extends Controller
 										"message"=>$message,
 										"id_ticket"=>$ticket->id,
 										"tickets"=>$tickets
-									],200);
+									],422);
 					}else{
 						$ticket->user_id = Auth::user()->id;
 						$message = "Le ticket est maintenat à vous de traiter";
