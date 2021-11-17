@@ -33,7 +33,13 @@ class TicketController extends Controller
 
     public function myTickets(){
         if(Auth::check()){
-            $tickets = Ticket::where('user_id',Auth::user()->id)->orderBy('created_at','asc')->get();
+            $tickets = Ticket::where('user_id',Auth::user()->id)->orderBy('created_at','desc')->get();
+            foreach($tickets as $ticket){
+                $agent = User::find($ticket->user_id);
+                $customer = User::find($ticket->createdBy);
+                $ticket->agent = $agent;
+                $ticket->customer = $customer;
+            }
             return response()->json(["tickets"=>$tickets],200);
         }else{
             return response()->json(["message"=>"Vous n'êtes pas connecté"],403);
