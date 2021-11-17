@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Ticket;
-
+use App\Models\User;
 class MessageController extends Controller
 {
 
@@ -66,7 +66,19 @@ class MessageController extends Controller
                             'send_to'=>$ticket->createdBy
                         ]);
                         if($ticket->save() && $message){
-                            return response()->json(["message"=>"Tâche effectué avec succès. Notification envoyée."],200);
+                            $tickets = Ticket::where('user_id',Auth::user()->id)->orderBy('created_at','desc')->get();
+                            foreach($tickets as $t){
+                                $agent = User::find($t->user_id);
+                                $customer = User::find($t->createdBy);
+                                $t->agent = $agent;
+                                $t->customer = $customer;
+                            }
+                            return response()->json([
+                                "message"=>"Tâche effectué avec succès. Notification envoyée.",
+                                "tickets"=>$tickets,
+                                "id_ticket"=>$ticket->id
+
+                                ],200);
                         }else{
                             return response()->json(["message"=>"Erreur inconnue, veuillez réessayer"],500);
                         }
