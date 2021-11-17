@@ -51,7 +51,7 @@ class MessageController extends Controller
                     if($ticket){
                         $ticket->etat = 'done';
                         $fichier = '';
-                        if ($request->hasFile('fichier')) {
+                        if ($request->fichier) {
                             $name_file = uniqid() . '.' . $request->file("fichier")->getClientOriginalExtension();
                             $request->file("fichier")->storeAs(
                                 'public',
