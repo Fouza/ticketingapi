@@ -108,14 +108,15 @@ class TicketController extends Controller
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
 					$tickets = Ticket::orderBy('created_at','desc')->get();
-					foreach($tickets as $t){
-                        $agent = User::find($t->user_id);
-                        $customer = User::find($t->createdBy);
-                        $t->agent = $agent;
-                        $t->customer = $customer;
-                    }
+
 					if(!!$ticket->user_id){
 	                    $message = "Ce ticket est déjà pris";
+                        foreach($tickets as $t){
+                            $agent = User::find($t->user_id);
+                            $customer = User::find($t->createdBy);
+                            $t->agent = $agent;
+                            $t->customer = $customer;
+                        }
 						return response()
 									->json([
 										"message"=>$message,
@@ -126,6 +127,12 @@ class TicketController extends Controller
 						$ticket->user_id = Auth::user()->id;
 						$message = "Le ticket est maintenat à vous de traiter";
 						if($ticket->save()){
+                            foreach($tickets as $t){
+                                $agent = User::find($t->user_id);
+                                $customer = User::find($t->createdBy);
+                                $t->agent = $agent;
+                                $t->customer = $customer;
+                            }
 							return response()
 									->json([
 										"message"=>$message,
