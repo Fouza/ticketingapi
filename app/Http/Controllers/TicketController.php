@@ -107,24 +107,37 @@ class TicketController extends Controller
             if(Auth::user()->type == 'agent'){
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
-                    $ticket->user_id = Auth::user()->id;
 					$tickets = Ticket::orderBy('created_at','desc')->get();
-                    foreach($tickets as $ticket){
+					foreach($tickets as $ticket){
                         $agent = User::find($ticket->user_id);
                         $customer = User::find($ticket->createdBy);
                         $ticket->agent = $agent;
                         $ticket->customer = $customer;
                     }
-                    if($ticket->save()){
-                        return response()
-                                ->json([
-                                    "message"=>"Le ticket est maintenat à vous de traiter",
-                                    "id_ticket"=>$ticket->id,
-									"tickets"=>$tickets
-                                ],200);
-                    }else{
-                        return response()->json(["message"=>"Erreur inconnue, veuillez réessayer"],500);
-                    }
+					if(!$ticket->user_id){
+	                    $message = "Ce ticket est déjà pris";
+						return response()
+									->json([
+										"message"=>$message,
+										"id_ticket"=>$ticket->id,
+										"tickets"=>$tickets
+									],200);
+					}else{
+						$ticket->user_id = Auth::user()->id;
+						$message = "Le ticket est maintenat à vous de traiter";
+						if($ticket->save()){
+							return response()
+									->json([
+										"message"=>$message,
+										"id_ticket"=>$ticket->id,
+										"tickets"=>$tickets
+									],200);
+						}else{
+							return response()->json(["message"=>"Erreur inconnue, veuillez réessayer"],500);
+						}
+					}
+
+
                 }else{
                     return response()->json(["message"=>"Veuillez choisir un ticket à prendre"],401);
                 }
