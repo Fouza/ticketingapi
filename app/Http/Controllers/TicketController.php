@@ -108,13 +108,13 @@ class TicketController extends Controller
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
 					$tickets = Ticket::orderBy('created_at','desc')->get();
-					foreach($tickets as $ticket){
-                        $agent = User::find($ticket->user_id);
-                        $customer = User::find($ticket->createdBy);
-                        $ticket->agent = $agent;
-                        $ticket->customer = $customer;
+					foreach($tickets as $t){
+                        $agent = User::find($t->user_id);
+                        $customer = User::find($t->createdBy);
+                        $t->agent = $agent;
+                        $t->customer = $customer;
                     }
-					if($ticket->user_id){
+					if(!!$ticket->user_id){
 	                    $message = "Ce ticket est déjà pris";
 						return response()
 									->json([
