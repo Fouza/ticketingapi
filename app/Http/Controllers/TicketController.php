@@ -108,11 +108,19 @@ class TicketController extends Controller
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
                     $ticket->user_id = Auth::user()->id;
+					$tickets = Ticket::orderBy('created_at','desc')->get();
+                    foreach($tickets as $ticket){
+                        $agent = User::find($ticket->user_id);
+                        $customer = User::find($ticket->createdBy);
+                        $ticket->agent = $agent;
+                        $ticket->customer = $customer;
+                    }
                     if($ticket->save()){
                         return response()
                                 ->json([
                                     "message"=>"Le ticket est maintenat à vous de traiter",
-                                    "id_ticket"=>$ticket->id
+                                    "id_ticket"=>$ticket->id,
+									"tickets"=>$tickets
                                 ],200);
                     }else{
                         return response()->json(["message"=>"Erreur inconnue, veuillez réessayer"],500);
