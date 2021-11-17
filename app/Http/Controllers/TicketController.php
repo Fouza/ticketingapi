@@ -114,7 +114,7 @@ class TicketController extends Controller
                         $ticket->agent = $agent;
                         $ticket->customer = $customer;
                     }
-					if(!$ticket->user_id){
+					if($ticket->user_id){
 	                    $message = "Ce ticket est déjà pris";
 						return response()
 									->json([
