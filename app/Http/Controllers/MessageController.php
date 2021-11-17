@@ -35,14 +35,14 @@ class MessageController extends Controller
     public function finishTicket(Request $request){
         if(Auth::check()){
             if(Auth::user()->type == 'agent'){
-                $validator = Validator::make($request->all(), [
-                    'fichier' => 'mimes:zip|max:5000',
-                    'notes' => 'required|string',
-                ]);
+                // $validator = Validator::make($request->all(), [
+                //     'fichier' => 'mimes:zip|max:5000',
+                //     'notes' => 'required|string',
+                // ]);
 
-                if($validator->fails()){
-                    return response(['errors'=>$validator->errors()->all()], 422);
-                }
+                // if($validator->fails()){
+                //     return response(['errors'=>$validator->errors()->all()], 422);
+                // }
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
                     if($ticket->user_id != Auth::user()->id){
