@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Ticket;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
+
 class MessageController extends Controller
 {
 
@@ -57,6 +59,7 @@ class MessageController extends Controller
                                 'public',
                                 $name_file
                             );
+                            //$path = Storage::putFile($name_file, $request->fichier);
                             $fichier = $name_file;
                         }
                         $message = Message::create([
@@ -76,7 +79,7 @@ class MessageController extends Controller
                             return response()->json([
                                 "message"=>"Tâche effectué avec succès. Notification envoyée.",
                                 "tickets"=>$tickets,
-                                "id_ticket"=>$ticket->id
+                                "file"=>$fichier,
 
                                 ],200);
                         }else{
