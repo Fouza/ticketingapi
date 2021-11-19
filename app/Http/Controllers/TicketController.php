@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Message;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,12 @@ class TicketController extends Controller
                 $customer = User::find($ticket->createdBy);
                 $ticket->agent = $agent;
                 $ticket->customer = $customer;
+                if($ticket->etat == 'done'){
+                    $msg = Message::where('id_ticket',$ticket->id)->first();
+                    $ticket->fichier = $msg->fichier;
+                }else{
+                    $ticket->fichier = '';
+                }
             }
             return response()->json(["tickets"=>$tickets],200);
         }else{
@@ -33,14 +40,24 @@ class TicketController extends Controller
 
     public function myTickets(){
         if(Auth::check()){
-            $tickets = Ticket::where('user_id',Auth::user()->id)->orderBy('created_at','desc')->get();
-            foreach($tickets as $ticket){
-                $agent = User::find($ticket->user_id);
-                $customer = User::find($ticket->createdBy);
-                $ticket->agent = $agent;
-                $ticket->customer = $customer;
+            if(Auth::user()->type =='agent'){
+                $tickets = Ticket::where('user_id',Auth::user()->id)->orderBy('created_at','desc')->get();
+                foreach($tickets as $ticket){
+                    $agent = User::find($ticket->user_id);
+                    $customer = User::find($ticket->createdBy);
+                    $ticket->agent = $agent;
+                    $ticket->customer = $customer;
+                    if($ticket->etat == 'done'){
+                        $msg = Message::where('id_ticket',$ticket->id)->first();
+                        $ticket->fichier = $msg->fichier;
+                    }else{
+                        $ticket->fichier = '';
+                    }
+                }
+                return response()->json(["tickets"=>$tickets],200);
+            }else{
+                return response()->json(["message"=>"Seules les assistantes DZ ont des tickets"],403);
             }
-            return response()->json(["tickets"=>$tickets],200);
         }else{
             return response()->json(["message"=>"Vous n'êtes pas connecté"],403);
         }
@@ -85,6 +102,12 @@ class TicketController extends Controller
                         $customer = User::find($ticket->createdBy);
                         $ticket->agent = $agent;
                         $ticket->customer = $customer;
+                        if($ticket->etat == 'done'){
+                            $message = Message::where('id_ticket',$ticket->id)->first();
+                            $ticket->fichier = $message->fichier;
+                        }else{
+                            $ticket->fichier = '';
+                        }
                     }
                     return response()->json([
                         "message"=>"Ticket crée avec succès",
@@ -122,6 +145,12 @@ class TicketController extends Controller
                             $customer = User::find($t->createdBy);
                             $t->agent = $agent;
                             $t->customer = $customer;
+                            if($t->etat == 'done'){
+                                $msg = Message::where('id_ticket',$t->id)->first();
+                                $t->fichier = $msg->fichier;
+                            }else{
+                                $t->fichier = '';
+                            }
                         }
 						return response()
 									->json([
@@ -139,6 +168,12 @@ class TicketController extends Controller
                                 $customer = User::find($t->createdBy);
                                 $t->agent = $agent;
                                 $t->customer = $customer;
+                                if($t->etat == 'done'){
+                                    $msg = Message::where('id_ticket',$t->id)->first();
+                                    $t->fichier = $msg->fichier;
+                                }else{
+                                    $t->fichier = '';
+                                }
                             }
 							return response()
 									->json([

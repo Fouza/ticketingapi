@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\FinishedEmail;
 class MessageController extends Controller
 {
 
@@ -19,6 +20,15 @@ class MessageController extends Controller
         if(Auth::check()){
             if(Auth::user()->type == 'customer'){
                 $messages = Message::where('send_to',Auth::user()->id)->orderBy("created_at","asc")->get();
+                foreach($messages as $msg){
+                    $ticket = Ticket::find($msg->id_ticket);
+                    $msg->title = $ticket->title;
+                    $msg->description = $ticket->description;
+                    $agent = User::find($ticket->user_id);
+                    $customer = User::find($ticket->createdBy);
+                    $msg->agent = $agent;
+                    $msg->customer = $customer;
+                }
                 return response()->json(["messages"=>$messages],200);
             }else{
                 return response()->json(["message"=>"Vous n'avez pas de messages"],403);
@@ -34,23 +44,31 @@ class MessageController extends Controller
     // Ajouter des remarques `notes` optionnel
     // La terminaison d'un ticket veut dire l'envoie d'une notification à l'assistante FR `customer`
 
+    // Fonction
+    private function sendFinishedEmail($sendTo, $ticket_id, $username){
+        $mailData = [
+            'title' => 'Ticket '.$ticket_id.' a été effectué',
+            'body' => $username.' a terminé le ticket '.$ticket_id,
+            'sub' => 'Vous pouvez dés à présent consulter les notes et les fichiers associés'
+        ];
+
+        Mail::to("gf_oukacha@esi.dz")->send(new FinishedEmail($mailData));
+
+        return response()->json([
+            "message" => "Email envoyé"
+        ]);
+    }
+
     public function finishTicket(Request $request){
         if(Auth::check()){
             if(Auth::user()->type == 'agent'){
-                // $validator = Validator::make($request->all(), [
-                //     'fichier' => 'mimes:zip|max:5000',
-                //     'notes' => 'required|string',
-                // ]);
-
-                // if($validator->fails()){
-                //     return response(['errors'=>$validator->errors()->all()], 422);
-                // }
+                $user = Auth::user();
                 if($request->id_ticket){
                     $ticket = Ticket::find($request->id_ticket);
-                    if($ticket->user_id != Auth::user()->id){
+                    if($ticket->user_id != $user->id){
                         return response()->json(["message"=>"Vous n'avez pas le droit de terminer ce ticket"],403);
                     }
-                    if($ticket){
+                    if($ticket && $ticket->etat=='todo'){
                         $ticket->etat = 'done';
                         $fichier = '';
                         if ($request->fichier) {
@@ -69,24 +87,25 @@ class MessageController extends Controller
                             'send_to'=>$ticket->createdBy
                         ]);
                         if($ticket->save() && $message){
-                            $tickets = Ticket::where('user_id',Auth::user()->id)->orderBy('created_at','desc')->get();
+                            $tickets = Ticket::where('user_id',$user->id)->orderBy('created_at','desc')->get();
                             foreach($tickets as $t){
                                 $agent = User::find($t->user_id);
                                 $customer = User::find($t->createdBy);
                                 $t->agent = $agent;
                                 $t->customer = $customer;
                             }
+                            $username = $user->name.' '.$user->lastname;
+                            $this->sendFinishedEmail($ticket->createdBy, $ticket->id, $username);
                             return response()->json([
                                 "message"=>"Tâche effectué avec succès. Notification envoyée.",
                                 "tickets"=>$tickets,
                                 "file"=>$fichier,
-
                                 ],200);
                         }else{
                             return response()->json(["message"=>"Erreur inconnue, veuillez réessayer"],500);
                         }
                     }else{
-                        return response()->json([],401);
+                        return response()->json(["message"=>"Ticket inexistant ou déjà effectué"],401);
                     }
                 }
 
@@ -98,6 +117,7 @@ class MessageController extends Controller
         }
 
     }
+
 
     // Marquer un message comme lu
 
@@ -118,6 +138,7 @@ class MessageController extends Controller
             return response()->json(["message"=>"Vous n'êtes pas connecté"],403);
         }
     }
+
 
     /**
      * Display a listing of the resource.
