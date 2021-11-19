@@ -93,6 +93,8 @@ class MessageController extends Controller
                                 $customer = User::find($t->createdBy);
                                 $t->agent = $agent;
                                 $t->customer = $customer;
+                                $message = Message::where('id_ticket',$t->id)->first();
+                                $t->fichier = $message->fichier;
                             }
                             $username = $user->name.' '.$user->lastname;
                             $this->sendFinishedEmail($ticket->createdBy, $ticket->id, $username);
